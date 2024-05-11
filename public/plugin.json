@@ -1,0 +1,25 @@
+{
+	"name": "cheng",
+	"pluginName": "nvm-ui",
+	"description": "nvm图形界面,快速切换node版本",
+	"author": "",
+	"homepage": "",
+	"version": "1.0.0",
+	"logo": "logo.png",
+	"main": "index.html",
+	"preload": "preload.js",
+	"development": {
+	  "main": "http://127.0.0.1:4000",
+	  "preload": "preload.js"
+	},
+	"features": [
+	  {
+		"code": "nvm",
+		"explain": "nvm图形界面",
+		"cmds": [
+		  "nvm"
+		]
+	  }
+	]
+  }
+  

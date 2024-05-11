@@ -1,17 +1,30 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <NvmUI></NvmUI>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import NvmUI from './components/NvmUI.vue'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    NvmUI
+  },
+  methods:{
+    handleClick(){
+      console.log("window" , window.services)
+      window.services.cmd('nvm ls' , ( err , stdout , stderr  ) => {
+        if( err ){
+          console.log("err" , err );
+        }
+        console.log("stdout" , stdout );
+        console.log("stderr" , stderr );
+      })
+    }
+  },
+  mounted() {
+    console.log('App.vue mounted');
   }
 }
 </script>
