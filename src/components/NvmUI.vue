@@ -22,10 +22,7 @@ export default{
     methods:{
         getNodeVersions(){
             const cmd = 'nvm ls'
-            window?.services?.cmd( cmd , ( err , stdout ) => {
-                if( err ){
-                    this.$message.error( err || '获取node版本失败！');
-                }
+            window?.services?.cmd( cmd ).then( stdout => {
                 this.list = stdout?.split('\n')?.filter( item => item.trim() )?.map( item => {
                     if( !item ) return item;
                     let reg = /([1-9]\d|[1-9])(.([1-9]\d|\d)){2}/g;
@@ -43,19 +40,12 @@ export default{
         },
         handleChange(version){
             console.log("version" , version)
-            // const cmd = 'nvm use ' + version;
-            const path =  window?.services?.getFilePath( 'changeNodeVersion.bat' )
-            // const cmd = 'nvm ls';
-            // const cmd = `powershell -Command "nvm use ${version}" -Verb RunAs`;
-            const cmd = `powershell.exe Start-Process -FilePath "${path}" -WindowStyle hidden -Verb runAs`;
-            console.log("path" , path);
+            const cmd = `nvm use ${version}`;
             console.log("cmd" , cmd);
-            window?.services?.cmd( cmd ,( err , stdout , stderr) => {
-                if( err ){
-                    this.$message.error( err || '切换node版本失败！');
-                }
-                console.log('stdout' , stdout );
-                console.log('stderr' , stderr );
+            window?.services?.sudo(cmd).then( stdout => {
+                console.log("stdout: " , stdout )
+            }).catch( err => {
+                console.log("err: " , err)
             })
         }
     },
