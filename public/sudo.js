@@ -48,6 +48,9 @@ class Exec {
       const cmd = ['@echo off', 'chcp 65001>nul', command].join('\r\n');
       fs.writeFileSync(this.cmdP, cmd);
       child_process.exec(this.startCmd, (err) => {
+        if(err){
+          reject(err);
+        }
         this.checkStatus(() => {
           let code = fs.readFileSync(this.statP, 'utf-8');
           code = parseInt(code.trim(), 10);
