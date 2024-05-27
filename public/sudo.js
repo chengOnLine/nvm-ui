@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
-// const tmpDir = require('os').tmpdir();
+const tmpDir = require('os').tmpdir();
 
 const CHECKSTATUS_TIMEINTERVAL = 800;
 
@@ -18,7 +18,7 @@ class Exec {
   }
   setFilesPath() {
     const dirName = String(Date.now()) + Math.random().toString(16).substring(2, 6);
-    this.dirPath = path.join(__dirname, dirName);
+    this.dirPath = path.join(tmpDir, dirName);
     [this.cmdP, this.execP, this.outP, this.errP, this.statP] = this.fileNames.map(name => path.join(this.dirPath, name));
   }
   writeFile() {
@@ -77,4 +77,4 @@ class Exec {
   }
 }
 
-module.exports = new Exec();
+module.exports = Exec;

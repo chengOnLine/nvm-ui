@@ -8,6 +8,10 @@
 	"logo": "logo.png",
 	"main": "index.html",
 	"preload": "preload.js",
+	"development": {
+		"main": "http://127.0.0.1:4000",
+		"preload": "preload.js"
+	},
 	"features": [
 	  {
 		"code": "nvm",

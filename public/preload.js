@@ -1,6 +1,6 @@
  // 开发者可以暴露自定义 API 供后加载脚本使用
 const { exec } = require('child_process');
-const sudo = require('./sudo');
+const Sudo = require('./sudo');
 
  window.services = {
     cmd: (cmd) => {
@@ -14,6 +14,7 @@ const sudo = require('./sudo');
       })
     },
     sudo: (cmd) => {
-        return sudo?.execOnce( cmd );
+      const sudo = new Sudo();
+      return sudo?.execOnce( cmd );
     },
   }

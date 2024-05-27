@@ -245,6 +245,7 @@ export default{
         },
         handleChange(version){
             const cmd = `nvm use ${version}`;
+            this.changeLoading = true;
             window?.services?.sudo(cmd).then( stdout => {
                 console.log("stdout: " , stdout )
                 this.$message.success("切换成功")
@@ -252,6 +253,7 @@ export default{
                 console.log("err: " , err)
                 this.$message.error("切换失败")
             }).finally( () => {
+                this.changeLoading = false;
                 this.getNodeVersions();
                 this.getDetail();
             })
