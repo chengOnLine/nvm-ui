@@ -1,10 +1,18 @@
 <template>
     <div class="container">
-        <el-card class="box-card" v-loading="basicLoading">
+        <div class="info-warpper">
+            <div>1. 本插件依赖NVM,参考安装教程： <el-link @click="toWeb('https://blog.csdn.net/jiangjunyuan168/article/details/134216065')" type="primary">https://blog.csdn.net/jiangjunyuan168/article/details/134216065</el-link></div>
+            <div>2. 如果切换node版本无响应（一直转圈圈），可能是代码运行过程中生成的临时文件的路径含有中文名称导致系统无法识别，将系统默认编码设置为UTF-8即可解决。参考：<el-link type="primary" @click="toWeb('https://www.jb51.net/os/win11/908703.html')">https://www.jb51.net/os/win11/908703.html</el-link></div>
+            <div>3. 如果觉得好用，希望给个5星评分，你们的支持就是我的动力，谢谢。</div>
+        </div> 
+        <el-card class="box-card">
             <div slot="header">
-                <span>基本信息</span>
+                <div class="flex" style="display: flex;justify-content: space-between;align-items: center;">
+                    <div>基本信息</div>
+                    <el-button plain type="primary" @click="handleRefreshClick" icon="el-icon-refresh">刷新</el-button>
+                </div>
             </div>
-            <div class="row">
+            <div class="row" v-loading="basicLoading">
                 <div class="col">
                     <div class="label">当前nvm版本：</div>
                     <div class="value">{{ detail.NVMVersion || '--' }}</div>
@@ -16,15 +24,18 @@
             </div>
         </el-card>
 
-        <el-card class="box-card" v-loading="changeLoading">
+        <el-card class="box-card">
             <div slot="header">
-                <span>切换Node版本</span>
+                <div>切换Node版本<span style="font-weight: normal;">(点击版本号切换node版本)</span></div>
             </div>
-            <el-radio-group v-model="version" @change="handleChange">
-                <el-radio-button v-for="item in list" :label="item" :key="item">
-                    {{item}}
-                </el-radio-button>
-            </el-radio-group>
+            <div class="version-list-wrapper" v-loading="changeLoading">
+                <el-radio-group v-if="list?.length > 0" v-model="version" @change="handleChange">
+                    <el-radio-button v-for="item in list" :label="item" :key="item">
+                        {{item}}
+                    </el-radio-button>
+                </el-radio-group>
+                <div v-if="list?.length == 0">当前系统没有检测到已安装的node版本</div>
+            </div>
         </el-card>
 
         <el-card class="box-card">
@@ -39,9 +50,10 @@
                     v-model="installVersion"
                     :fetch-suggestions="querySearch"
                     placeholder="请输入或选择要安装的node版本号，例如14.17.3"
+                    clearable
                 >
                 </el-autocomplete>
-                <el-button :loading="installLoading" @click="handleInstallClick">{{ installLoading ? '安装中' : '安装' }}</el-button>
+                <el-button type="primary" :loading="installLoading" @click="handleInstallClick">{{ installLoading ? '安装中' : '安装' }}</el-button>
             </div>
         </el-card>
 
@@ -51,10 +63,10 @@
             </div>
 
             <div class="flex">
-                <el-select style="flex: 1" placeholder="请选择要卸载的node版本号" v-model="unInstallVersion">
+                <el-select style="flex: 1" placeholder="请选择要卸载的node版本号" v-model="unInstallVersion" clearable>
                     <el-option v-for="(version,idx) in list" :label="version" :value="version" :key="idx"></el-option>
                 </el-select>
-                <el-button :loading="unInstallLoading" @click="handleUnInstallClick">{{ unInstallLoading ? '卸载中' : '卸载' }}</el-button>
+                <el-button type="danger" :loading="unInstallLoading" @click="handleUnInstallClick">{{ unInstallLoading ? '卸载中' : '卸载' }}</el-button>
             </div>
         </el-card>
 <!-- 
@@ -98,14 +110,21 @@ export default{
             nodeVersionList: [],
         }
     },
+    mounted(){
+        this.getNodeVersions();
+        this.getNodeAvailableVersions();
+        this.getDetail();
+    },
     methods:{
-        querySearch(queryString, cb) {
-            var nodeVersionList = this.nodeVersionList;
-            console.log("queryString" , queryString)
-            var results = queryString ? nodeVersionList.filter( ( restaurant ) => restaurant.value?.toLowerCase()?.indexOf(queryString?.toLowerCase()) === 0 ) : nodeVersionList;
-            console.log("result" , results)
-            // 调用 callback 返回建议列表的数据
-            cb(results);
+        toWeb(url){
+            console.log("url" , url );
+            if( !url ) return;
+            window?.services?.open(url);
+        },
+        handleRefreshClick(){
+            this.getNodeVersions();
+            this.getNodeAvailableVersions();
+            this.getDetail();
         },
         handleRunClick(){
             this.run(this.command);
@@ -134,6 +153,14 @@ export default{
                 console.log("installVersion" , this.unInstallVersion)
                 this.unInstallNode(this.unInstallVersion)
             })  
+        },
+        querySearch(queryString, cb) {
+            var nodeVersionList = this.nodeVersionList;
+            console.log("queryString" , queryString)
+            var results = queryString ? nodeVersionList.filter( ( restaurant ) => restaurant.value?.toLowerCase()?.indexOf(queryString?.toLowerCase()) === 0 ) : nodeVersionList;
+            console.log("result" , results)
+            // 调用 callback 返回建议列表的数据
+            cb(results);
         },
         run(cmd){
             if( !cmd ) return;
@@ -187,7 +214,7 @@ export default{
             window?.services?.cmd( cmd ).then( stdout => {
                 let reg = /\d+.\d+.\d+/g;
                 let list = stdout?.match(reg);
-                this.nodeVersionList = list.map( version => ({ value: version }) );
+                this.nodeVersionList = list.map( version => ({ value: version }) ).reverse();
             }).catch( () => {
                 this.$message.error("获取node所有可用版本失败，请检查是否已经安装npm或环境变量设置")
             })
@@ -259,11 +286,6 @@ export default{
             })
         }
     },
-    mounted(){
-        this.getNodeVersions();
-        this.getNodeAvailableVersions();
-        this.getDetail();
-    }
 }
 </script>
 
@@ -272,6 +294,17 @@ export default{
     text-align: left;
     font-size: 16px;
     font-weight: bold;
+}
+.el-card{
+    /* margin-bottom: 5px; */
+}
+.info-warpper{
+    background-color: #ffffff;
+    border: 1px solid #b3d8ff;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    text-align: left;
+    background-color: #ecf5ff;
 }
 .log-list{
     margin-top: 15px;
@@ -294,6 +327,14 @@ export default{
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    margin-bottom: 10px;
+}
+.col-24{
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
 }
 .flex{
     display: flex;

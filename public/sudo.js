@@ -15,10 +15,12 @@ class Exec {
     this.setFilesPath();
     this.writeFile();
     this.startCmd = `powershell.exe Start-Process -FilePath "${this.execP}" -WindowStyle hidden -Verb runAs`;
+    // console.log("startCmd" , this.startCmd)
   }
   setFilesPath() {
     const dirName = String(Date.now()) + Math.random().toString(16).substring(2, 6);
     this.dirPath = path.join(tmpDir, dirName);
+    // console.log("dirPath: " , this.dirPath );
     [this.cmdP, this.execP, this.outP, this.errP, this.statP] = this.fileNames.map(name => path.join(this.dirPath, name));
   }
   writeFile() {
@@ -28,10 +30,13 @@ class Exec {
       `call "${this.cmdP}" > "${this.outP}" 2> "${this.errP}"`,
       `(echo %ERRORLEVEL%) > "${this.statP}"`
     ].join('\r\n');
+    // console.log("exec1" , `call "${this.cmdP}" > "${this.outP}" 2> "${this.errP}"` );
+    // console.log("exec2" ,   `(echo %ERRORLEVEL%) > "${this.statP}"`);
     fs.writeFileSync(this.execP, execCmds);
   }
   checkStatus(cb) {
     fs.stat(this.statP, (err, stat) => {
+      // console.log("stat.size" , stat.size )
       if ((err && err.code === 'ENOENT') || stat.size < 2) {
         setTimeout(() => this.checkStatus(cb), CHECKSTATUS_TIMEINTERVAL);
       } else if (err) {
